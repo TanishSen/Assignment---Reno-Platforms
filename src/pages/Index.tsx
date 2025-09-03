@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -14,13 +15,48 @@ import {
 } from "lucide-react";
 
 const Index = () => {
-  // Stats data - maybe fetch from API later?
-  const stats = [
-    { icon: Building2, label: "Schools", value: "147", color: "text-blue-600" },
-    { icon: Users, label: "Students", value: "12.5K+", color: "text-blue-600" },
-    { icon: MapPin, label: "Cities", value: "8", color: "text-blue-600" },
-    //{ icon: Award, label: "Featured", value: "89%", color: "text-blue-600" },
-  ];
+  // Dynamic stats state
+  const [stats, setStats] = useState([
+    { icon: Building2, label: "Schools", value: "...", color: "text-blue-600" },
+    { icon: Users, label: "Students", value: "...", color: "text-blue-600" },
+    { icon: MapPin, label: "Cities", value: "...", color: "text-blue-600" },
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch dynamic stats from API
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:3001/api/stats');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch stats');
+        }
+        
+        const data = await response.json();
+        
+        // Update stats with real data
+        setStats([
+          { icon: Building2, label: "Schools", value: data.totalSchools?.toString() || "0", color: "text-blue-600" },
+          { icon: Users, label: "Students", value: data.totalStudents || "0", color: "text-blue-600" },
+          { icon: MapPin, label: "Cities", value: data.totalCities?.toString() || "0", color: "text-blue-600" },
+        ]);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        // Fallback to default values if API fails
+        setStats([
+          { icon: Building2, label: "Schools", value: "0", color: "text-blue-600" },
+          { icon: Users, label: "Students", value: "0", color: "text-blue-600" },
+          { icon: MapPin, label: "Cities", value: "0", color: "text-blue-600" },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const features = [
     {
@@ -97,7 +133,13 @@ const Index = () => {
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 mb-4 mx-auto">
                       <stat.icon className="h-6 w-6 text-blue-600" />
                     </div>
-                    <div className="text-3xl font-bold mb-2">{stat.value}</div>
+                    <div className="text-3xl font-bold mb-2">
+                      {loading ? (
+                        <div className="h-8 w-16 bg-gray-200 rounded animate-pulse mx-auto"></div>
+                      ) : (
+                        stat.value
+                      )}
+                    </div>
                     <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
                   </CardContent>
                 </Card>

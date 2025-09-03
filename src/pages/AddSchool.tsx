@@ -21,7 +21,8 @@ import {
   Check,
   ArrowLeft,
   Save,
-  Loader2
+  Loader2,
+  Users
 } from "lucide-react";
 
 const schoolSchema = z.object({
@@ -35,6 +36,12 @@ const schoolSchema = z.object({
     .max(15, "Contact too long")
     .regex(/^\d+$/, "Contact must contain only digits"),
   email_id: z.string().email("Invalid email"),
+  students: z
+    .string()
+    .min(1, "Number of students is required")
+    .regex(/^\d+$/, "Must be a valid number")
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => val > 0, "Must be greater than 0"),
 });
 
 type SchoolFormValues = z.infer<typeof schoolSchema>;
@@ -78,6 +85,7 @@ export default function AddSchoolPage() {
       formData.append('state', data.state);
       formData.append('contact', data.contact);
       formData.append('email_id', data.email_id);
+      formData.append('students', data.students.toString());
       
       if (selectedFile) {
         formData.append('image', selectedFile);
@@ -284,6 +292,27 @@ export default function AddSchoolPage() {
                     <p className="text-sm text-red-600">{errors.email_id.message}</p>
                   )}
                 </div>
+              </div>
+
+              {/* Number of Students */}
+              <div className="space-y-2">
+                <Label htmlFor="students" className="text-sm font-medium text-gray-700">
+                  Number of Students *
+                </Label>
+                <div className="relative">
+                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="students"
+                    type="number"
+                    min="1"
+                    {...register("students")}
+                    className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="Enter number of students"
+                  />
+                </div>
+                {errors.students && (
+                  <p className="text-sm text-red-600">{errors.students.message}</p>
+                )}
               </div>
 
               {/* Image Upload */}

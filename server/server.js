@@ -85,11 +85,23 @@ async function initializeDatabase() {
         contact VARCHAR(15) NOT NULL,
         image TEXT,
         email_id TEXT NOT NULL,
+        students INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
     
     await db.execute(createTableQuery);
+    
+    // Add students column if it doesn't exist (for existing databases)
+    try {
+      await db.execute('ALTER TABLE schools ADD COLUMN students INT DEFAULT 0');
+    } catch (error) {
+      // Column already exists, ignore the error
+      if (!error.message.includes('Duplicate column name')) {
+        console.error('Error adding students column:', error);
+      }
+    }
+    
     console.log('Database and table initialized successfully');
     await db.end();
   } catch (error) {
@@ -119,19 +131,25 @@ app.get('/api/schools', async (req, res) => {
 // Add new school
 app.post('/api/schools', upload.single('image'), async (req, res) => {
   try {
-    const { name, address, city, state, contact, email_id } = req.body;
+    const { name, address, city, state, contact, email_id, students } = req.body;
     
     // Validation
-    if (!name || !address || !city || !state || !contact || !email_id) {
+    if (!name || !address || !city || !state || !contact || !email_id || !students) {
       return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    // Validate students is a positive number
+    const studentCount = parseInt(students);
+    if (isNaN(studentCount) || studentCount <= 0) {
+      return res.status(400).json({ error: 'Number of students must be a positive number' });
     }
 
     const imagePath = req.file ? `/uploads/schoolImages/${req.file.filename}` : null;
     
     const db = await mysql.createConnection(dbConfig);
     const [result] = await db.execute(
-      'INSERT INTO schools (name, address, city, state, contact, image, email_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [name, address, city, state, contact, imagePath, email_id]
+      'INSERT INTO schools (name, address, city, state, contact, image, email_id, students) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [name, address, city, state, contact, imagePath, email_id, studentCount]
     );
     await db.end();
 
@@ -162,6 +180,43 @@ app.get('/api/schools/:id', async (req, res) => {
   } catch (error) {
     console.error('Error fetching school:', error);
     res.status(500).json({ error: 'Failed to fetch school' });
+  }
+});
+
+// Get statistics for dashboard
+app.get('/api/stats', async (req, res) => {
+  try {
+    const db = await mysql.createConnection(dbConfig);
+    
+    // Get total schools count
+    const [schoolsResult] = await db.execute('SELECT COUNT(*) as count FROM schools');
+    const totalSchools = schoolsResult[0].count;
+    
+    // Get unique cities count
+    const [citiesResult] = await db.execute('SELECT COUNT(DISTINCT city) as count FROM schools');
+    const totalCities = citiesResult[0].count;
+    
+    // Get actual total students from database
+    const [studentsResult] = await db.execute('SELECT SUM(students) as total FROM schools');
+    const actualStudents = studentsResult[0].total || 0;
+    
+    let totalStudents;
+    if (actualStudents >= 1000) {
+      totalStudents = (actualStudents / 1000).toFixed(1) + 'K+';
+    } else {
+      totalStudents = actualStudents.toString();
+    }
+    
+    await db.end();
+    
+    res.json({
+      totalSchools,
+      totalStudents,
+      totalCities
+    });
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ error: 'Failed to fetch statistics' });
   }
 });
 
