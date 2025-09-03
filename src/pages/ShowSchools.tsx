@@ -40,42 +40,7 @@ export default function ShowSchoolsPage() {
     } catch (error) {
       console.error('Error fetching schools:', error);
       setError('Failed to load schools. Please make sure the server is running.');
-      // Fallback to mock data if API fails
-      setSchools([
-        {
-          id: 1,
-          name: "Green Valley High School",
-          address: "123 Education Street, Learning District",
-          city: "Mumbai",
-          state: "Maharashtra",
-          contact: "9876543210",
-          email_id: "contact@greenvalley.edu",
-          image: "/placeholder.svg",
-          created_at: "2024-01-15T10:30:00Z"
-        },
-        {
-          id: 2,
-          name: "Sunrise Academy",
-          address: "456 Knowledge Avenue, Academic Zone",
-          city: "Delhi",
-          state: "Delhi",
-          contact: "9876543211",
-          email_id: "info@sunriseacademy.edu",
-          image: "/placeholder.svg",
-          created_at: "2024-01-16T11:30:00Z"
-        },
-        {
-          id: 3,
-          name: "Oak Tree International",
-          address: "789 Wisdom Boulevard, Education Hub",
-          city: "Bangalore",
-          state: "Karnataka",
-          contact: "9876543212",
-          email_id: "admissions@oaktree.edu",
-          image: "/placeholder.svg",
-          created_at: "2024-01-17T09:30:00Z"
-        }
-      ]);
+      setSchools([]); // Set empty array instead of mock data
     } finally {
       setLoading(false);
     }
@@ -168,12 +133,12 @@ export default function ShowSchoolsPage() {
           <div className="text-center py-12">
             <Building2 className="mx-auto h-16 w-16 text-gray-400 mb-4" />
             <h3 className="text-xl font-medium text-gray-900 mb-2">
-              {searchTerm ? 'No schools found' : 'No schools available'}
+              {searchTerm ? 'No schools found' : 'No Schools Available'}
             </h3>
             <p className="text-gray-600 mb-6">
               {searchTerm 
                 ? 'Try adjusting your search terms' 
-                : 'Be the first to add a school to our directory'
+                : 'No schools have been added to the directory yet. Be the first to add one!'
               }
             </p>
             {!searchTerm && (
