@@ -67,18 +67,29 @@ This project is built with:
 
 - Vite
 - TypeScript
-- React
-- shadcn-ui
+## Technologies Used
+
+- React 18 with TypeScript
+- Vite
 - Tailwind CSS
+- Shadcn/ui components
+- Node.js + Express.js
+- MySQL Database
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/33a62363-6903-45c8-9921-f6a5406c22e1) and click on Share -> Publish.
+### Frontend
+```bash
+npm run build
+# Deploy the dist/ folder to your hosting provider
+```
 
-## Can I connect a custom domain to my Lovable project?
+### Backend
+1. Set up MySQL database on your server
+2. Update environment variables
+3. Install dependencies: `npm install`
+4. Start server: `npm start`
 
-Yes, you can!
+## License
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is for educational purposes.
