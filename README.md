@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🎓 School Directory Management System
 
 A comprehensive full-stack web application for managing and displaying school information, built with React, Node.js, Express, and MySQL. This project provides a complete solution for school data management with dynamic statistics, image uploads, and responsive design.
